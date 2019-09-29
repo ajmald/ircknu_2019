@@ -18,7 +18,7 @@ namespace IrkcnuApi.Models
         public string Key { get; set; }
 
         [BsonElement("ArtikelCode")]
-        public int ArtikelCode { get; set; }
+        public string ArtikelCode { get; set; }
         
         [BsonElement("ColorCode")]
         public string ColorCode { get; set; }
@@ -36,7 +36,7 @@ namespace IrkcnuApi.Models
         public string Q1 { get; set; }
 
         [BsonElement("Size")]
-        public int Size { get; set; }
+        public string Size { get; set; }
 
         [BsonElement("Color")]
         public string Color { get; set; }

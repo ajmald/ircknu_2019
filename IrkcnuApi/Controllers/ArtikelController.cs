@@ -44,6 +44,15 @@ namespace IrkcnuApi.Controllers
             return CreatedAtRoute("GetArtikel", new { id = artikel.Id.ToString() }, artikel);
         }
 
+        [HttpPost("createArtikels")]
+        public ActionResult<string> CreateArtikels(List<Artikel> artikels)
+        {
+            string s = _artikelService.CreateArtikels(artikels);
+            return s;
+        }
+
+      
+
         [HttpPut("{id:length(24)}")]
         public IActionResult Update(string id, Artikel artikelIn)
         {

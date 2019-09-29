@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using IrkcnuApi.Services;
 using Newtonsoft.Json;
 using System.Text;
+using IrkcnuApi.Models;
 
 
 namespace IrkcnuApi.Controllers
@@ -17,10 +18,12 @@ namespace IrkcnuApi.Controllers
 	{
         public IHostingEnvironment HostingEnvironment { get; set; }
         private readonly ImportService _importService;
-        public UploadController(IHostingEnvironment hostingEnvironment, ImportService importService)
+        private readonly ArtikelService _artikelService;
+        public UploadController(IHostingEnvironment hostingEnvironment, ImportService importService, ArtikelService artikelService)
         {
             HostingEnvironment = hostingEnvironment;
             _importService = importService;
+            _artikelService = artikelService;
         }
 
         
@@ -48,9 +51,14 @@ namespace IrkcnuApi.Controllers
                         await file.CopyToAsync(fileStream);
                     }
                     string data = _importService.ConvertCsvFileToJsonObject(physicalPath);
-                    physicalPath = Path.Combine(HostingEnvironment.WebRootPath, "App_Data", fileName + ".json");
+
+                    List<Artikel> artikels = JsonConvert.DeserializeObject<List<Artikel>>(data);
+                    _artikelService.CreateArtikels(artikels);
+                    /*Mongodb way, convert the object into a json file and then import it into the collection */
+                    /*Longer but just to illustrate */
+                    /*physicalPath = Path.Combine(HostingEnvironment.WebRootPath, "App_Data", fileName + ".json");
                     System.IO.File.WriteAllText(physicalPath,data);
-                    _importService.InsertDocumentsInCollection(physicalPath);
+                    _importService.InsertDocumentsInCollection(physicalPath);*/
                 }
             }
 

@@ -48,7 +48,9 @@ namespace IrkcnuApi
                         Email = string.Empty,
                         Url = new Uri("https://localhost:5001/upload/index"),
                     }
+
                 });
+                //c.ResolveConflictingActions (apiDescriptions => apiDescriptions.First());
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
             });

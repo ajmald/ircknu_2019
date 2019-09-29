@@ -6,7 +6,7 @@
     <members>
         <member name="M:IrkcnuApi.Controllers.ArtikelsController.Delete(System.String)">
             <summary>
-            Deletes a specific TodoItem.
+            Deletes a specific Artikel.
             </summary>
             <param name="id"></param>  
         </member>

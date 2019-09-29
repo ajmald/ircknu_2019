@@ -28,7 +28,21 @@ namespace IrkcnuApi.Services
             _artikels.InsertOne(artikel);
             return artikel;
         }
-
+        public string CreateArtikels(List<Artikel> artikels)
+        {
+            try
+            {
+                _artikels.InsertManyAsync(artikels).GetAwaiter().GetResult();
+            }
+            catch(MongoWriteException mwx)
+            {
+                if (mwx.WriteError.Category == ServerErrorCategory.DuplicateKey) 
+                {
+                    return "Duplicate key : KO";
+                }
+            }
+            return "Ok";
+        }
         public void Update(string id, Artikel artikelIn) =>
             _artikels.ReplaceOne(artikel => artikel.Id == id, artikelIn);
 

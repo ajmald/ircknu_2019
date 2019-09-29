@@ -7,6 +7,8 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Diagnostics;
+using System;
 
 namespace IrkcnuApi.Services
 {
@@ -16,8 +18,6 @@ namespace IrkcnuApi.Services
         private readonly IMongoCollection<Artikel> _artikels;
         private readonly IMongoDatabase _database;
         private readonly MongoClient _mongoClient;
-
-        private IIrckcnuDatabaseSettings settings;
         public ImportService(IIrckcnuDatabaseSettings settings)
         {
             _mongoClient = new MongoClient(settings.ConnectionString);
@@ -25,19 +25,6 @@ namespace IrkcnuApi.Services
             _artikels= _database.GetCollection<Artikel>(settings.ArtikelCollectionName);
         }
 
-        public async void ImportFile(string fileName)
-        {
-            IrckcnuDatabaseSettings settings = new IrckcnuDatabaseSettings();
-            var client = new MongoClient(settings.ConnectionString);
-            var database = client.GetDatabase(settings.DatabaseName);
-            var transformedFile = ConvertCsvFileToJsonObject(fileName);
-            string text = System.IO.File.ReadAllText(transformedFile);
-            var document = BsonSerializer.Deserialize<BsonDocument>(text);
-            var collection = database.GetCollection<BsonDocument>("Artikel");
-            await collection.InsertOneAsync(document);
-    
-        }
-      
         public string ConvertCsvFileToJsonObject(string path) 
         {
                 var csv = new List<string[]>();
@@ -58,19 +45,29 @@ namespace IrkcnuApi.Services
 
                     listObjResult.Add(objResult);
                 }
-                
-                //var data = (from row in path.Split('\n') select row.Split(',')).ToList();
-                return JsonConvert.SerializeObject(listObjResult,Formatting.Indented); 
+                return JsonConvert.SerializeObject(listObjResult); 
         }
 
-        public async void InsertDocumentsInCollection(string jsonFile)
+
+        //Read the contents of the json file, then deserialize it and map to a BsonDocument
+        public void InsertDocumentsInCollection(string jsonFile)
         {
             string text = System.IO.File.ReadAllText(jsonFile);
-            //var document = BsonSerializer.Deserialize<BsonDocument>(text);
             IEnumerable<BsonDocument> doc = BsonSerializer.Deserialize<BsonArray>(text).Select(p => p.AsBsonDocument);
             var collection = _database.GetCollection<BsonDocument>("Artikels");
-            await collection.InsertManyAsync(doc);  
+            try
+            {
+                collection.InsertManyAsync(doc).GetAwaiter().GetResult();
+            }
+            catch(MongoWriteException mwx)
+            {
+                if (mwx.WriteError.Category == ServerErrorCategory.DuplicateKey) 
+                {
+                }
+            }
         }
+
+        
 
     }
 }
