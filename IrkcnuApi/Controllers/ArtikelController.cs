@@ -59,6 +59,11 @@ namespace IrkcnuApi.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Deletes a specific Artikel.
+        /// </summary>
+        /// <param name="id"></param>  
+
         [HttpDelete("{id:length(24)}")]
         public IActionResult Delete(string id)
         {

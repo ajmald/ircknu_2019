@@ -18,7 +18,7 @@ namespace IrkcnuApi.Services
         }
 
         public List<Artikel> Get() =>
-            _artikels.Find(book => true).ToList();
+            _artikels.Find(artikel => true).ToList();
 
         public Artikel Get(string id) =>
             _artikels.Find<Artikel>(artikel => artikel.Id == id).FirstOrDefault();

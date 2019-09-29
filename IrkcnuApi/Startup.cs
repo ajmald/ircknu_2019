@@ -12,6 +12,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using IrkcnuApi.Models;
 using IrkcnuApi.Services;
+using Microsoft.OpenApi.Models;
+using System.Reflection;
+using System.IO;
+
 
 namespace IrkcnuApi
 {
@@ -27,10 +31,36 @@ namespace IrkcnuApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc()
+            .AddJsonOptions(options => options.UseMemberCasing())
+            .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+           services.AddSwaggerGen(c =>
+            {
+                //A hack to link the upload functionality
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Version = "v1",
+                    Title = "IRcknuAPI",
+                    Description = "An upload tool using WebApi Core, Swagger,KendoUI and MongoDB",
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Upload Service",
+                        Email = string.Empty,
+                        Url = new Uri("https://localhost:5001/upload/index"),
+                    }
+                });
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            });
+
+
             services.Configure<IrckcnuDatabaseSettings>(Configuration.GetSection(nameof(IrckcnuDatabaseSettings)));
-            services.AddSingleton<IIrckcnuDatabaseSettings>(SpaApplicationBuilderExtensions=>SpaApplicationBuilderExtensions.GetRequiredService<IOptions<IrckcnuDatabaseSettings>>().Value);
+            services.AddSingleton<IIrckcnuDatabaseSettings>(sp => sp.GetRequiredService<IOptions<IrckcnuDatabaseSettings>>().Value);
             services.AddSingleton<ArtikelService>();
+            services.AddSingleton<ImportService>();
+            services.AddKendo();
+            
+       
 
         }
 
@@ -46,8 +76,21 @@ namespace IrkcnuApi
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+            app.UseSwagger();
+
+    // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
+    // specifying the Swagger JSON endpoint.
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "IRcknuApi");
+                c.RoutePrefix = string.Empty;
+
+            });
 
             app.UseHttpsRedirection();
+            app.UseDeveloperExceptionPage();
+            app.UseStaticFiles();
+            app.UseMvcWithDefaultRoute();
             app.UseMvc();
         }
     }

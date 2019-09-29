@@ -1,8 +1,12 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using Microsoft.AspNetCore;
+using Newtonsoft.Json;
+
 
 namespace IrkcnuApi.Models
 {
+    [BsonIgnoreExtraElements]
     public class Artikel
     {
         [BsonId]
@@ -10,6 +14,7 @@ namespace IrkcnuApi.Models
         public string Id { get; set; }
 
         [BsonElement("Key")]
+        [JsonProperty("Key")]
         public string Key { get; set; }
 
         [BsonElement("ArtikelCode")]
@@ -35,16 +40,5 @@ namespace IrkcnuApi.Models
 
         [BsonElement("Color")]
         public string Color { get; set; }
-
-
-
-
-
-
-
-
-        public string Category { get; set; }
-
-        public string Author { get; set; }
     }
 }
